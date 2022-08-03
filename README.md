@@ -9,14 +9,14 @@
 
 - Installing hardhat globally: `npx hardhat`
   above commend creates `hardhat.config.json` file
+  
+    ```js
+    //\*_ @type import('hardhat/config').HardhatUserConfig _/
+    module.exports = {
+    solidity: "0.8.9",
+    };
 
-      ```json
-      /\*_ @type import('hardhat/config').HardhatUserConfig _/
-      module.exports = {
-      solidity: "0.8.9",
-      };
-
-      ```
+  ```
 
 - Installing Hardhat locallly `npm install --save-dev hardhat`
 - Creating Folder Struture:
@@ -40,7 +40,7 @@
     require("@nomiclabs/hardhat-waffle");
     require("solidity-coverage");
 
-    /\*_ @type import('hardhat/config').HardhatUserConfig _/
+    //\*_ @type import('hardhat/config').HardhatUserConfig _/
     module.exports = {
     solidity: "0.8.9",
     };
@@ -49,12 +49,14 @@
 
 - Adding Commands:
   In `package.json` under script add these lines:
+  
+  ```js
+    "build": "hardhat compile",
+    "test:light": "hardhat test",
+    "test": "hardhat coverage",
 
-      ```json
-            "build": "hardhat compile",
-            "test:light": "hardhat test",
-            "test": "hardhat coverage",
-      ```
+  ```
+
 
   Above lines of code should execute: 1. `build` run smart contracts files from `contracts` folder. 2. `test:light` it invokes Waffle for testing contracts. 3. `test` it invokes Waffle tests and generates coverage.
 
@@ -86,48 +88,50 @@
 - Compile contract by: `npm run build`
 - testing:
   In `test/MyContract.test.js` put code:
+  
+   ```js
+    const { expect } = require("chai");
 
-        ```js
-            const { expect } = require("chai");
+    describe("MyContract", () => {
+    it("should return its name", async () => {
+    const MyContract = await ethers.getContractFactory("MyContract");
+    const myContract = await MyContract.deploy("My Contract");
 
-            describe("MyContract", () => {
-            it("should return its name", async () => {
-                const MyContract = await ethers.getContractFactory("MyContract");
-                const myContract = await MyContract.deploy("My Contract");
+    await myContract.deployed();
+    expect(await myContract.getName()).to.equal("My Contract");
+    });
+    it("should change its name when requested", async () => {
+    const MyContract = await ethers.getContractFactory("MyContract");
+    const myContract = await MyContract.deploy("My Contract");
 
-                await myContract.deployed();
-                expect(await myContract.getName()).to.equal("My Contract");
-            });
-            it("should change its name when requested", async () => {
-                const MyContract = await ethers.getContractFactory("MyContract");
-                const myContract = await MyContract.deploy("My Contract");
+       await myContract.changeName("Another Contract");
+       expect(await myContract.getName()).to.equal("Another Contract");
+    });
+    });
 
-                await myContract.changeName("Another Contract");
-                expect(await myContract.getName()).to.equal("Another Contract");
-            });
-            });
-
-        ```
+  ```
 
 - Run tests `npm run test`
 - Deploying smart contract:
   In `scripts/deployMyContract.js` put:
+  
+    ```js
+    async function main() {
+    const MyContract = await ethers.getContractFactory("MyContract");
+    const myContract = await MyContract.deploy("My Contract");
 
-            ```js
-            async function main() {
-                const MyContract = await ethers.getContractFactory("MyContract");
-                const myContract = await MyContract.deploy("My Contract");
+    console.log("My Contract deployed to:", myContract.address);
+    }
 
-                console.log("My Contract deployed to:", myContract.address);
-            }
+      main()
+       .then(() => process.exit(0))
+       .catch((error) => {
+         console.error(error);
+         process.exit(1);
+       });
 
-            main()
-                .then(() => process.exit(0))
-                .catch((error) => {
-                console.error(error);
-                process.exit(1);
-                });
-            ```
+  ```
+
 
 - Add deploy command in `package.json`:
   `"deploy:local": "hardhat run --network localhost scripts/deployMyContract.js"`,
